@@ -1,0 +1,24 @@
+{
+  "name": "hw-wk-12",
+  "version": "1.0.0",
+  "description": "HW week 12",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ggzaragoza/Zaragoza-HW-Wk12-Employee-Mgmt-Sys.git"
+  },
+  "author": "Greg Zaragoza",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ggzaragoza/Zaragoza-HW-Wk12-Employee-Mgmt-Sys/issues"
+  },
+  "homepage": "https://github.com/ggzaragoza/Zaragoza-HW-Wk12-Employee-Mgmt-Sys#readme",
+  "dependencies": {
+    "console.table": "^0.10.0",
+    "inquirer": "^8.2.0",
+    "mysql2": "^2.3.0"
+  }
+}
