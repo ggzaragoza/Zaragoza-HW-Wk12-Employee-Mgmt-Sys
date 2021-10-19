@@ -10,6 +10,8 @@ const db = mysql.createConnection(
     },
 );
 
+const data = require('./server.js');
+
 const getAllDepts = () => {
     db.execute('SELECT * FROM department', function (err, results) {
         console.table(results);
@@ -37,8 +39,14 @@ const getAllEmployees = () => {
         console.table(results);
 })};
 
+const createNewDept = () => {
+    db.query(`INSERT INTO department (name) VALUES (?)`, data, function (err, results) {
+        console.table(results);
+})};
+
 module.exports = {
     getAllDepts,
     getAllRoles,
-    getAllEmployees
+    getAllEmployees,
+    createNewDept
 };

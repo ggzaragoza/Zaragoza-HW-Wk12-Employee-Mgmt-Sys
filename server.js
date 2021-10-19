@@ -6,6 +6,8 @@ require('dotenv').config();
 // const PORT = process.env.PORT || 3001;
 // const app = express();
 const queries = require('./queries.js');
+const classes = require('./classes.js');
+const { Department, Role } = require('./classes.js');
 
 // // Express middleware
 // app.use(express.urlencoded({ extended: false }));
@@ -57,7 +59,7 @@ initSystem = () => {
               type: 'list',
               message: "Welcome to the Employee Management System. What would you like to do?",
               name: 'employeeOptions',
-              choices: ['View All Departments', 'View All Roles', 'View All Employees', 'Quit']
+              choices: ['View All Departments', 'View All Roles', 'View All Employees', 'Create New Department', 'Quit']
           }
       ])
       .then((data) => {
@@ -67,8 +69,37 @@ initSystem = () => {
           queries.getAllRoles();
         } else if (data.employeeOptions === 'View All Employees') {
           queries.getAllEmployees();
+        } else if (data.employeeOptions === 'Create New Department') {
+          askNewDept();
         }
       });
 };
+
+askNewDept = () => {
+  inquirer
+    .prompt([
+        {
+            type: 'input',
+            message: "Wnat is the name of your company's new Department? (required)",
+            name: 'newDept',
+            validate: (input) => {
+                if (input === '') {
+                    return console.log('Please enter a new Department name.')
+                } else {
+                    return true;
+                }
+            }
+        }
+    ])
+    .then((data) => {
+      // if (data.newDept) {
+        const newDepartment = new Department(data.newDept);
+        newDepartment.createNewDept();
+      // }
+    });
+    
+
+      // initSystem();
+}
 
 initSystem();
