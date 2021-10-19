@@ -21,11 +21,11 @@ VALUES (001, "Graphic Designer", 40000, 001),
        (014, "Creative Director", 125000, 004),
        (015, "President/CEO", 1500000, 004);
 
-INSERT INTO employee (id, first_name, last_name, role_id)
-VALUES (001, "Stefani", "Germanotta", 014),
-       (002, "Beyonce", "Knowles", 013),
-       (003, "Rihanna", "Fenty", 004),
-       (004, "Britney", "Spears", 007),
-       (005, "Mariah", "Carey", 015);
+INSERT INTO employee (id, first_name, last_name, role_id, manager_id)
+VALUES (001, "Stefani", "Germanotta", 014, null),
+       (002, "Beyonce", "Knowles", 013, 001),
+       (003, "Rihanna", "Fenty", 004, 002),
+       (004, "Britney", "Spears", 007, 001),
+       (005, "Mariah", "Carey", 015, null);
 
        

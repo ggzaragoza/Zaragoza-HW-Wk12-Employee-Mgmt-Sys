@@ -1,9 +1,11 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
+const cTable = require('console.table');
 require('dotenv').config();
 
-const PORT = process.env.PORT || 3001;
+// const PORT = process.env.PORT || 3001;
 // const app = express();
+const queries = require('./queries.js');
 
 // // Express middleware
 // app.use(express.urlencoded({ extended: false }));
@@ -21,9 +23,23 @@ const db = mysql.createConnection(
 );
 
 // Query database
-db.query('SELECT * FROM students', function (err, results) {
-  console.log(results);
-});
+// db.execute('SELECT * FROM department', function (err, results) {
+//   console.table(results);
+// });
+
+// db.execute('SELECT * FROM role', function (err, results) {
+//   console.table(results);
+// });
+
+// db.query('SELECT * FROM employee', function (err, results) {
+//   console.table(results);
+// });
+
+// db.execute('SELECT * FROM employee', function (err, results) {
+//   console.table(results);
+// });
+
+// console.table(department);
 
 // // Default response for any other request (Not Found)
 // app.use((req, res) => {
@@ -33,3 +49,26 @@ db.query('SELECT * FROM students', function (err, results) {
 // app.listen(PORT, () => {
 //   console.log(`Server running on port ${PORT}`);
 // });
+
+initSystem = () => {
+  inquirer
+      .prompt([
+          {
+              type: 'list',
+              message: "Welcome to the Employee Management System. What would you like to do?",
+              name: 'employeeOptions',
+              choices: ['View All Departments', 'View All Roles', 'View All Employees', 'Quit']
+          }
+      ])
+      .then((data) => {
+        if (data.employeeOptions === 'View All Departments') {
+          queries.getAllDepts();
+        } else if (data.employeeOptions === 'View All Roles') {
+          queries.getAllRoles();
+        } else if (data.employeeOptions === 'View All Employees') {
+          queries.getAllEmployees();
+        }
+      });
+};
+
+initSystem();
