@@ -13,8 +13,6 @@ const db = mysql.createConnection(
 class Department {
     constructor(name) {
         this.name = name;
-        // this.id = id;
-        // this.email = email;
     }
 
     createNewDept () {
@@ -23,71 +21,25 @@ class Department {
             console.table(results);
         })
     };
-    //     const getAllDepts = () => {
-    //         db.execute('SELECT * FROM department', function (err, results) {
-    //             console.table(results);
-    //     })};
-    // }
-
-    // getName() {
-    //     return this.name;
-    // }
-
-    // getId() {
-    //     return this.id;
-    // }
-    
-    // getEmail() {    
-    //     return this.email;
-    // }
-    
-    // getRole() {
-    //     return 'Employee';
-    // }
 }
 
 class Role {
-    constructor(name) {
-        this.name = name;
-        // this.id = id;
-        // this.email = email;
+    constructor(title, salary, department_id) {
+        this.title = title;
+        this.salary = salary;
+        this.department_id = department_id;
     }
 
-    createNewDept () {
-        db.query(`INSERT INTO department (name) VALUES (?)`, this.name);
-        db.query('SELECT * FROM department', function (err, results) {
+    createNewRole () {
+        db.query(`SELECT @department_id :=id FROM department WHERE name = ?`, this.department_id);
+        db.query(`INSERT INTO role (id, title, salary, department_id) VALUES (id, ?, ?, @department_id)`, [this.title, this.salary]);
+        db.query('SELECT * FROM role', function (err, results) {
             console.table(results);
         })
     };
-    //     const getAllDepts = () => {
-    //         db.execute('SELECT * FROM department', function (err, results) {
-    //             console.table(results);
-    //     })};
-    // }
-
-    // getName() {
-    //     return this.name;
-    // }
-
-    // getId() {
-    //     return this.id;
-    // }
-    
-    // getEmail() {    
-    //     return this.email;
-    // }
-    
-    // getRole() {
-    //     return 'Employee';
-    // }
 }
 
 module.exports = {
     Department,
     Role
 }
-
-// const newEmp = new Employee("Greg", 1, "greg.g.zaragoza@gmail.com");
-// console.log(newEmp);
-// console.log(newEmp.getRole());
-// console.log(newEmp.getName());

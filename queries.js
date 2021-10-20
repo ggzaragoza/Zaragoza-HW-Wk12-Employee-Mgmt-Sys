@@ -39,14 +39,14 @@ const getAllEmployees = () => {
         console.table(results);
 })};
 
-const createNewDept = () => {
-    db.query(`INSERT INTO department (name) VALUES (?)`, data, function (err, results) {
-        console.table(results);
-})};
+// const createNewDept = () => {
+//     db.query(`INSERT INTO department (name) VALUES (?)`, data, function (err, results) {
+//         console.table(results);
+// })};
 
 module.exports = {
     getAllDepts,
     getAllRoles,
     getAllEmployees,
-    createNewDept
+    // createNewDept
 };
