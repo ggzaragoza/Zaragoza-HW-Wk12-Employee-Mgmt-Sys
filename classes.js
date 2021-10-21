@@ -47,10 +47,13 @@ class Employee {
         this.manager_id = manager_id;
     }
 
-    createNewRole () {
-        db.query(`SELECT @department_id :=id FROM department WHERE name = ?`, this.department_id);
-        db.query(`INSERT INTO role (id, title, salary, department_id) VALUES (id, ?, ?, @department_id)`, [this.title, this.salary]);
-        db.query('SELECT * FROM role', function (err, results) {
+    addNewEmployee () {
+        // db.query(`SELECT @department_id :=id FROM department WHERE name = ?`, this.department_id);
+
+        db.query(`SELECT @role_id :=id FROM role WHERE title = ?`, this.role_id);
+        db.query("SELECT @manager_id :=id FROM employee WHERE first_name = SUBSTRING_INDEX(?, ' ', 1)", this.manager_id);
+        db.query(`INSERT INTO employee (id, first_name, last_name, role_id, manager_id) VALUES (id, ?, ?, @role_id, @manager_id)`, [this.first_name, this.last_name]);
+        db.query('SELECT * FROM employee', function (err, results) {
             console.table(results);
         })
     };
