@@ -6,7 +6,7 @@ require('dotenv').config();
 // const PORT = process.env.PORT || 3001;
 // const app = express();
 const queries = require('./queries.js');
-const { Department, Role } = require('./classes.js');
+const { Department, Role, Employee } = require('./classes.js');
 
 // // Express middleware
 // app.use(express.urlencoded({ extended: false }));
@@ -18,6 +18,7 @@ const db = mysql.createConnection(
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
+    multipleStatements: true,
     database: 'employees_db'
   },
 //   console.log(`Connected to the classlist_db database.`)
@@ -31,7 +32,7 @@ initSystem = () => {
             type: 'list',
             message: "Welcome to the Employee Management System. What would you like to do?",
             name: 'employeeOptions',
-            choices: ['View All Departments', 'View All Roles', 'View All Employees', 'Create New Department', 'Create New Role', 'Quit']
+            choices: ['View All Departments', 'View All Roles', 'View All Employees', 'Create New Department', 'Create New Role', 'Add New Employee', 'Quit']
         }
     ])
     .then((data) => {
@@ -45,9 +46,54 @@ initSystem = () => {
         askNewDept();
       } else if (data.employeeOptions === 'Create New Role') {
         askNewRole();
+      } else if (data.employeeOptions === 'Add New Employee') {
+        askNewEmp();
+      } else {
+        process.exit;
       }
     });
 };
+
+function getDepartments() {
+  return new Promise((resolve, reject) => {
+    db.query(`SELECT name FROM department`, (err, res) => {
+      if (err) reject(err);
+      resolve(res);
+    });
+  });
+}
+
+function getRoles() {
+  return new Promise((resolve, reject) => {
+    db.query(`SELECT title FROM `, (err, res) => {
+      if (err) reject(err);
+      resolve(res);
+    });
+  });
+}
+
+// getRoles = () => {
+//   let allRoles = [];
+
+//   db.query('SELECT title FROM role', (err, results) => {
+//     return allRoles.push(results)
+//   });
+// };
+
+// function getRoles() {
+//   return new Promise((resolve, reject) => {
+//     db.query(`SELECT title FROM role`, (err, res) => {
+//       if (err) reject(err);
+//       resolve(res);
+//     });
+//   });
+// }
+
+// db.query('SELECT title FROM role', function (err, results) {
+//   const getRoles = results.map(role => {
+//     return `${role.title}`
+//   })}
+// )
 
 askNewDept = () => {
   inquirer
@@ -78,16 +124,9 @@ askNewDept = () => {
 
 askNewRole = () => {
 
-  function getDepartments() {
-    return new Promise((resolve, reject) => {
-      db.query(`SELECT name FROM department`, (err, res) => {
-        if (err) reject(err);
-        resolve(res);
-      });
-    });
-  }
+  getDepartments().then(deptData =>
 
-  inquirer
+    inquirer
     .prompt([
         {
             type: 'input',
@@ -117,7 +156,7 @@ askNewRole = () => {
             type: 'list',
             message: 'In which department will this new role be created?',
             name: 'newRoleDept',
-            choices: getDepartments
+            choices: deptData
         }
     ])
     .then((data) => {
@@ -125,51 +164,103 @@ askNewRole = () => {
         const newRole = new Role(data.newTitle, data.newSalary, data.newRoleDept);
         newRole.createNewRole();
       // }
-    });
+    })
+
+  )
+
     
+// initSystem();
+}
+
+askNewEmp = () => {
+  const addRoleInfo = `SELECT title FROM role; SELECT CONCAT(employee.first_name, ' ', employee.last_name) AS full_name FROM employee`
+
+  db.query(addRoleInfo, (err, results) => {
+    if (err) throw (err);
+
+    inquirer
+      .prompt([
+          {
+              type: 'input',
+              message: "Wnat is the new employee's first name? (required)",
+              name: 'empFirstName',
+              validate: (input) => {
+                  if (input === '') {
+                      return console.log('A name for the employee is required.')
+                  } else {
+                      return true;
+                  }
+              }
+          },
+          {
+              type: 'input',
+              message: "What is the new employee's last name? (required)",
+              name: 'empLastName',
+              validate: (input) => {
+                  if (input === '') {
+                      return console.log('A name for the employee is required.')
+                  } else {
+                      return true;
+                  }
+              }
+          },
+          {
+              type: 'list',
+              message: 'What title will the new employee hold?',
+              name: 'empRole',
+              choices: function () {
+                let roleChoices = results[0].map(role => role.title);
+                return roleChoices;
+              }
+          },
+          {
+              type: 'list',
+              message: "Who is the new employee's manager?",
+              name: 'empManager',
+              choices: function () {
+                let mgrChoices = results[1].map(employee => employee.full_name);
+                return mgrChoices;
+              }
+          }
+      ])
+      .then((data) => {
+        // if (data.newDept) {
+          const newEmp = new Employee(data.empFirstName, data.empLastName, data.empRole, data.empManager);
+          newEmp.addNewEmployee();
+        // }
+      })
+    
+
+
+    })
+
+  // getRoles().then(roleData =>
+
+  // function getRoles() {
+  //   return new Promise((resolve, reject) => {
+  //     db.query(`SELECT first_name FROM employee`, (err, res) => {
+  //       if (err) reject(err);
+  //       resolve(res);
+  //     });
+  //   });
+  // }
+
+  // function getEmployees() {
+  //   return new Promise((resolve, reject) => {
+  //     db.query(`SELECT
+  //     CONCAT(employee.first_name, ' ', employee.last_name)
+  //     FROM employee`, (err, res) => {
+  //       if (err) {
+  //         reject(err);
+  //       } else {
+  //         resolve(res);
+  //       }
+  //     });
+  //   });
+  // }
+
 
       // initSystem();
 }
 
 initSystem();
-
-
-      //   role.department_id AS department 
-      // FROM role
-      // JOIN department ON role.department_id = department.name;
-
-
-
-
-
-
-
-
-
-// Query database
-// db.execute('SELECT * FROM department', function (err, results) {
-//   console.table(results);
-// });
-
-// db.execute('SELECT * FROM role', function (err, results) {
-//   console.table(results);
-// });
-
-// db.query('SELECT * FROM employee', function (err, results) {
-//   console.table(results);
-// });
-
-// db.execute('SELECT * FROM employee', function (err, results) {
-//   console.table(results);
-// });
-
-// console.table(department);
-
-// // Default response for any other request (Not Found)
-// app.use((req, res) => {
-//   res.status(404).end();
-// });
-
-// app.listen(PORT, () => {
-//   console.log(`Server running on port ${PORT}`);
-// });

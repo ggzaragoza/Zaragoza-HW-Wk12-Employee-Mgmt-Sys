@@ -39,7 +39,25 @@ class Role {
     };
 }
 
+class Employee {
+    constructor(first_name, last_name, role_id, manager_id) {
+        this.first_name = first_name;
+        this.last_name = last_name;
+        this.role_id = role_id;
+        this.manager_id = manager_id;
+    }
+
+    createNewRole () {
+        db.query(`SELECT @department_id :=id FROM department WHERE name = ?`, this.department_id);
+        db.query(`INSERT INTO role (id, title, salary, department_id) VALUES (id, ?, ?, @department_id)`, [this.title, this.salary]);
+        db.query('SELECT * FROM role', function (err, results) {
+            console.table(results);
+        })
+    };
+}
+
 module.exports = {
     Department,
-    Role
+    Role,
+    Employee
 }
