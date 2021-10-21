@@ -3,16 +3,8 @@ const mysql = require('mysql2');
 const cTable = require('console.table');
 require('dotenv').config();
 
-// const PORT = process.env.PORT || 3001;
-// const app = express();
-const queries = require('./queries.js');
 const { Department, Role, Employee } = require('./classes.js');
 
-// // Express middleware
-// app.use(express.urlencoded({ extended: false }));
-// app.use(express.json());
-
-// Connect to database
 const db = mysql.createConnection(
   {
     host: process.env.DB_HOST,
@@ -21,27 +13,32 @@ const db = mysql.createConnection(
     multipleStatements: true,
     database: 'employees_db'
   },
-//   console.log(`Connected to the classlist_db database.`)
 );
 
 
-initSystem = () => {
+startMessage = () => {
+  console.log("Welcome to your employee management system. Here you can view and organize your fellow employees within your company.");
+  initSystem();
+}
+
+
+const initSystem = () => {
   inquirer
     .prompt([
         {
             type: 'list',
-            message: "Welcome to the Employee Management System. What would you like to do?",
+            message: "Please select an option.",
             name: 'employeeOptions',
             choices: ['View All Departments', 'View All Roles', 'View All Employees', 'Create New Department', 'Create New Role', 'Add New Employee', 'Quit']
         }
     ])
     .then((data) => {
       if (data.employeeOptions === 'View All Departments') {
-        queries.getAllDepts();
+        getAllDepts();
       } else if (data.employeeOptions === 'View All Roles') {
-        queries.getAllRoles();
+        getAllRoles();
       } else if (data.employeeOptions === 'View All Employees') {
-        queries.getAllEmployees();
+        getAllEmployees();
       } else if (data.employeeOptions === 'Create New Department') {
         askNewDept();
       } else if (data.employeeOptions === 'Create New Role') {
@@ -51,8 +48,9 @@ initSystem = () => {
       } else {
         process.exit;
       }
-    });
+    })
 };
+
 
 function getDepartments() {
   return new Promise((resolve, reject) => {
@@ -63,39 +61,69 @@ function getDepartments() {
   });
 }
 
-function getRoles() {
-  return new Promise((resolve, reject) => {
-    db.query(`SELECT title FROM `, (err, res) => {
-      if (err) reject(err);
-      resolve(res);
-    });
+
+const getAllDepts = () => {
+  db.query('SELECT * FROM department', function (err, results) {
+      console.log();
+      console.table(results);
   });
-}
 
-// getRoles = () => {
-//   let allRoles = [];
+  let promise = new Promise((resolve, reject) => {
+    setTimeout(function() {
+        resolve(initSystem());
+    }, 500);
+  });
+  promise.then(function(data) {
+    return data
+  }); 
+};
 
-//   db.query('SELECT title FROM role', (err, results) => {
-//     return allRoles.push(results)
-//   });
-// };
 
-// function getRoles() {
-//   return new Promise((resolve, reject) => {
-//     db.query(`SELECT title FROM role`, (err, res) => {
-//       if (err) reject(err);
-//       resolve(res);
-//     });
-//   });
-// }
+const getAllRoles = () => {
+  db.query('SELECT * FROM role', function (err, results) {
+      console.table(results);
+  });
 
-// db.query('SELECT title FROM role', function (err, results) {
-//   const getRoles = results.map(role => {
-//     return `${role.title}`
-//   })}
-// )
+  let promise = new Promise((resolve, reject) => {
+    setTimeout(function() {
+        resolve(initSystem());
+    }, 500);
+  });
+  promise.then(function(data) {
+    return data
+  });
+};
 
-askNewDept = () => {
+
+const getAllEmployees = () => {
+  db.query(`
+  SELECT
+    e1.id AS id,
+    e1.first_name AS first_name,
+    e1.last_name AS last_name,
+    role.title AS title,
+    department.name AS department,
+    role.salary AS salary,
+    CONCAT(e2.first_name, ' ', e2.last_name) AS manager
+  FROM employee AS e1
+  JOIN role ON e1.role_id = role.id
+  JOIN department ON role.department_id = department.id
+  LEFT OUTER JOIN employee AS e2 ON e2.id = e1.manager_id;`, function (err, results) {
+      console.table(results);
+  });
+
+  let promise = new Promise((resolve, reject) => {
+    setTimeout(function() {
+        resolve(initSystem());
+    }, 500);
+  });
+  promise.then(function(data) {
+    return data
+  });
+};
+
+
+const askNewDept = () => {
   inquirer
     .prompt([
         {
@@ -112,65 +140,75 @@ askNewDept = () => {
         }
     ])
     .then((data) => {
-      // if (data.newDept) {
         const newDepartment = new Department(data.newDept);
         newDepartment.createNewDept();
-      // }
-    });
-    
 
-      // initSystem();
-}
+        let promise = new Promise((resolve, reject) => {
+          setTimeout(function() {
+              resolve(initSystem());
+          }, 2000);
+        });
+        promise.then(function(data) {
+          return data
+        });
+    });
+};
+
 
 askNewRole = () => {
 
-  getDepartments().then(deptData =>
+  getDepartments()
+  .then(deptData =>
 
     inquirer
-    .prompt([
-        {
-            type: 'input',
-            message: "Wnat title will this new position hold? (required)",
-            name: 'newTitle',
-            validate: (input) => {
-                if (input === '') {
-                    return console.log('Please enter a title for this new position.')
-                } else {
-                    return true;
-                }
-            }
-        },
-        {
-            type: 'input',
-            message: "Please specify the projected salary for this new position. (required)",
-            name: 'newSalary',
-            validate: (input) => {
-                if (input === '') {
-                    return console.log('Please enter a salary number.')
-                } else {
-                    return true;
-                }
-            }
-        },
-        {
-            type: 'list',
-            message: 'In which department will this new role be created?',
-            name: 'newRoleDept',
-            choices: deptData
-        }
-    ])
-    .then((data) => {
-      // if (data.newDept) {
-        const newRole = new Role(data.newTitle, data.newSalary, data.newRoleDept);
-        newRole.createNewRole();
-      // }
-    })
+      .prompt([
+          {
+              type: 'input',
+              message: "Wnat title will this new position hold? (required)",
+              name: 'newTitle',
+              validate: (input) => {
+                  if (input === '') {
+                      return console.log('Please enter a title for this new position.')
+                  } else {
+                      return true;
+                  }
+              }
+          },
+          {
+              type: 'input',
+              message: "Please specify the projected salary for this new position. (required)",
+              name: 'newSalary',
+              validate: (input) => {
+                  if (input === '') {
+                      return console.log('Please enter a salary number.')
+                  } else {
+                      return true;
+                  }
+              }
+          },
+          {
+              type: 'list',
+              message: 'In which department will this new role be created?',
+              name: 'newRoleDept',
+              choices: deptData
+          }
+      ])
+      .then((data) => {
+          const newRole = new Role(data.newTitle, data.newSalary, data.newRoleDept);
+          newRole.createNewRole();
 
-  )
+          let promise = new Promise((resolve, reject) => {
+            setTimeout(function() {
+                resolve(initSystem());
+            }, 2000);
+          });
+          promise.then(function(data) {
+            return data
+          });
+      })
+  );
+};
 
-    
-// initSystem();
-}
 
 askNewEmp = () => {
   const addRoleInfo = `SELECT title FROM role; SELECT CONCAT(employee.first_name, ' ', employee.last_name) AS full_name FROM employee`
@@ -224,43 +262,20 @@ askNewEmp = () => {
           }
       ])
       .then((data) => {
-        // if (data.newDept) {
           const newEmp = new Employee(data.empFirstName, data.empLastName, data.empRole, data.empManager);
           newEmp.addNewEmployee();
-        // }
+
+          let promise = new Promise((resolve, reject) => {
+            setTimeout(function() {
+                resolve(initSystem());
+            }, 2000);
+          });
+          promise.then(function(data) {
+            return data
+          });
       })
-    
+  });
+};
 
 
-    })
-
-  // getRoles().then(roleData =>
-
-  // function getRoles() {
-  //   return new Promise((resolve, reject) => {
-  //     db.query(`SELECT first_name FROM employee`, (err, res) => {
-  //       if (err) reject(err);
-  //       resolve(res);
-  //     });
-  //   });
-  // }
-
-  // function getEmployees() {
-  //   return new Promise((resolve, reject) => {
-  //     db.query(`SELECT
-  //     CONCAT(employee.first_name, ' ', employee.last_name)
-  //     FROM employee`, (err, res) => {
-  //       if (err) {
-  //         reject(err);
-  //       } else {
-  //         resolve(res);
-  //       }
-  //     });
-  //   });
-  // }
-
-
-      // initSystem();
-}
-
-initSystem();
+startMessage();

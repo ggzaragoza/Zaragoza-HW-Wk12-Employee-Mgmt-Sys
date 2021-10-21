@@ -20,6 +20,7 @@ class Department {
         db.query('SELECT * FROM department', function (err, results) {
             console.table(results);
         })
+        console.log('New department added to database.')
     };
 }
 
@@ -36,6 +37,7 @@ class Role {
         db.query('SELECT * FROM role', function (err, results) {
             console.table(results);
         })
+        console.log('New role added to database.')
     };
 }
 
@@ -48,14 +50,13 @@ class Employee {
     }
 
     addNewEmployee () {
-        // db.query(`SELECT @department_id :=id FROM department WHERE name = ?`, this.department_id);
-
         db.query(`SELECT @role_id :=id FROM role WHERE title = ?`, this.role_id);
         db.query("SELECT @manager_id :=id FROM employee WHERE first_name = SUBSTRING_INDEX(?, ' ', 1)", this.manager_id);
         db.query(`INSERT INTO employee (id, first_name, last_name, role_id, manager_id) VALUES (id, ?, ?, @role_id, @manager_id)`, [this.first_name, this.last_name]);
         db.query('SELECT * FROM employee', function (err, results) {
             console.table(results);
         })
+        console.log('New employee added to database.')
     };
 }
 
